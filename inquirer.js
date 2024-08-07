@@ -62,19 +62,37 @@ const viewDepartments = async () => {
 };
 
 const viewRoles = async () => {
-  const res = await pool.query(
-    "SELECT role.id, title, salary, department.name AS department FROM role JOIN department ON role.department_id = department.id"
-  );
-  console.table(res.rows);
-  promptUser();
-};
+    const res = await pool.query(
+        `SELECT
+            role.id,
+            role.title,
+            department.name AS department,
+            role.salary
+        FROM role
+        LEFT JOIN department ON role.department_id = department.id`
+    );
+    console.table(res.rows);
+    promptUser();
+}
+
 
 const viewEmployees = async () => {
-  const res = await pool.query(
-    "SELECT employee.id, first_name, last_name, title, department.name AS department, salary, manager_id FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id"
-  );
-  console.table(res.rows);
-  promptUser();
+    const res = await pool.query(
+      `SELECT 
+        employee.id, 
+        employee.first_name, 
+        employee.last_name, 
+        role.title, 
+        department.name AS department, 
+        role.salary, 
+        CONCAT(manager.first_name, ' ', manager.last_name) AS manager 
+      FROM employee 
+      LEFT JOIN role ON employee.role_id = role.id 
+      LEFT JOIN department ON role.department_id = department.id 
+      LEFT JOIN employee manager ON employee.manager_id = manager.id`
+    );
+    console.table(res.rows);
+    promptUser();
 };
 
 const addDepartment = async () => {
@@ -130,5 +148,59 @@ const addRole = async () => {
         promptUser();
         });
     };
+
+const addEmployee = async () => {
+    const roles = await pool.query('SELECT id, title FROM role');
+    const roleChoices = [];
+    roles.rows.forEach(role => {
+        roleChoices.push({
+            name: role.title,
+            value: role.id
+        });
+    });
+
+    const managers = await pool.query('SELECT id, first_name, last_name FROM employee');
+    const managerChoices = [];
+    managers.rows.forEach(manager => {
+        managerChoices.push({
+            name: `${manager.first_name} ${manager.last_name}`,
+            value: manager.id
+        });
+    });
+
+    await inquirer
+        .prompt([
+        {
+            type: "input",
+            name: "first_name",
+            message: "Enter the employee's first name:",
+        },
+        {
+            type: "input",
+            name: "last_name",
+            message: "Enter the employee's last name:",
+        },
+        {
+            type: 'list',
+            name: 'role_id',
+            message: 'Select the role for the employee:',
+            choices: roleChoices
+        },
+        {
+            type: 'list',
+            name: 'manager_id',
+            message: 'Select the manager for the employee:',
+            choices: managerChoices
+        }
+        ])
+        .then(async (answers) => {
+        await pool.query(
+            "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)",
+            [answers.first_name, answers.last_name, answers.role_id, answers.manager_id]
+        );
+        promptUser();
+        });
+};
+
 
 module.exports = { promptUser };
