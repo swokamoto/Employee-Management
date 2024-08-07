@@ -1,5 +1,6 @@
 const express = require('express');
-const {pool} = require('pg');
+const { Pool } = require('pg');
+const { promptUser } = require('./inquirer');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -16,8 +17,7 @@ const pool = new Pool({
 
 pool.connect();
 
-
-
+promptUser();
 
 
 app.use((req, res) => { 
