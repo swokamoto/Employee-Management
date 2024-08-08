@@ -9,7 +9,7 @@ const pool = new Pool({
 });
 
 pool.connect();
-
+// main menu
 async function promptUser() {
   await inquirer
     .prompt([
@@ -28,6 +28,7 @@ async function promptUser() {
         ],
       },
     ])
+    // switch statement to handle the different options
     .then((answers) => {
       switch (answers.option) {
         case "View all departments":
@@ -54,7 +55,7 @@ async function promptUser() {
       }
     });
 }
-// dont show the index
+// 
 const viewDepartments = async () => {
   const res = await pool.query("SELECT id, name FROM department");
   console.table(res.rows);
@@ -75,7 +76,6 @@ const viewRoles = async () => {
     promptUser();
 }
 
-
 const viewEmployees = async () => {
     const res = await pool.query(
       `SELECT 
@@ -95,6 +95,7 @@ const viewEmployees = async () => {
     promptUser();
 };
 
+// add department
 const addDepartment = async () => {
   await inquirer
     .prompt([
@@ -112,8 +113,10 @@ const addDepartment = async () => {
     });
 };
 
+// add role
 const addRole = async () => {
-    const departments = await pool.query('SELECT id, name FROM department');
+  // get departments  
+  const departments = await pool.query('SELECT id, name FROM department');
     const departmentChoices = [];
     departments.rows.forEach(department => {
         departmentChoices.push({
@@ -149,8 +152,10 @@ const addRole = async () => {
         });
     };
 
+// add employee
 const addEmployee = async () => {
-    const roles = await pool.query('SELECT id, title FROM role');
+  // get roles  
+  const roles = await pool.query('SELECT id, title FROM role');
     const roleChoices = [];
     roles.rows.forEach(role => {
         roleChoices.push({
@@ -158,7 +163,7 @@ const addEmployee = async () => {
             value: role.id
         });
     });
-
+    // get managers
     const managers = await pool.query('SELECT id, first_name, last_name FROM employee');
     const managerChoices = [];
     managers.rows.forEach(manager => {
@@ -167,6 +172,8 @@ const addEmployee = async () => {
             value: manager.id
         });
     });
+    // add option for no manager
+    managerChoices.push({ name: 'None', value: null });
 
     await inquirer
         .prompt([
@@ -202,5 +209,49 @@ const addEmployee = async () => {
         });
 };
 
+// update employee role
+const updateEmployeeRole = async () => {
+  // get employees  
+  const employees = await pool.query('SELECT id, first_name, last_name FROM employee');
+    const employeeChoices = [];
+    employees.rows.forEach(employee => {
+        employeeChoices.push({
+            name: `${employee.first_name} ${employee.last_name}`,
+            value: employee.id
+        });
+    });
+    // get roles
+    const roles = await pool.query('SELECT id, title FROM role');
+    const roleChoices = [];
+    roles.rows.forEach(role => {
+        roleChoices.push({
+            name: role.title,
+            value: role.id
+        });
+    });
+
+    await inquirer
+        .prompt([
+        {
+            type: 'list',
+            name: 'employee_id',
+            message: 'Select the employee to update:',
+            choices: employeeChoices
+        },
+        {
+            type: 'list',
+            name: 'role_id',
+            message: 'Select the new role for the employee:',
+            choices: roleChoices
+        }
+        ])
+        .then(async (answers) => {
+        await pool.query(
+            "UPDATE employee SET role_id = $1 WHERE id = $2",
+            [answers.role_id, answers.employee_id]
+        );
+        promptUser();
+        });
+};
 
 module.exports = { promptUser };

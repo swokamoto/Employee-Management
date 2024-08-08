@@ -17,8 +17,8 @@ const pool = new Pool({
 
 pool.connect();
 
+console.log('EMPLOYEE MANAGEMENT SYSTEM');
 promptUser();
-
 
 app.use((req, res) => { 
     res.status(404).end();
