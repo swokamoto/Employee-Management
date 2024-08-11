@@ -1,5 +1,6 @@
 # Employee Management System
-[Link to GitHub repository](https://github.com/swokamoto/Employee-Management)
+-[Link to GitHub repository](https://github.com/swokamoto/Employee-Management)
+-[Link to video Demo](https://youtu.be/xBpo5_lBi40)
 ## Table of Contents
 
 - [Employee Management System](#employee-management-system)
@@ -21,4 +22,3 @@ To start the application, enter `npm start`. Then follow the prompts.
 Please follow the [Contributor Covenant](https://www.contributor-covenant.org/) guidelines.
 ## Questions
 If you have any questions, please reach out to me at swokamoto@gmail.com. 
-You can also check out the project at [https://github.com/swokamoto/Employee-Management](https://github.com/swokamoto/Employee-Management).
